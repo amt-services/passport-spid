@@ -27,11 +27,12 @@ export class SpidSAML extends SAML {
       isHttpPostBinding,
       host,
     );
-    console.log('XML AUTHN REQUEST', xml);
     const req = new SpidRequest(xml);
     const id = req.id;
 
     xml = req.generate(this.options).xml();
+    console.log('XML AUTHN REQUEST', xml);
+
     if (this.options.authnRequestBinding === 'HTTP-POST') {
       // re-sign request
       //xml = signAuthnRequestPost(xml, this.options as any);
