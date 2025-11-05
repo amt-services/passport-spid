@@ -27,6 +27,7 @@ export class SpidSAML extends SAML {
       isHttpPostBinding,
       host,
     );
+    console.log('XML AUTHN REQUEST', xml);
     const req = new SpidRequest(xml);
     const id = req.id;
 
@@ -45,6 +46,7 @@ export class SpidSAML extends SAML {
         action: 'after',
         nodeName: 'AuthnRequest',
       });
+      console.log('XML AUTHN REQUEST SIGNED', xml);
     }
     const { cache } = this.spidConfig;
     const cacheData: CacheData = {
