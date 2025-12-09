@@ -56,7 +56,6 @@ export const getIdpCert = (idp: Element) => {
       const { validTo } = new X509Certificate(pemCert);
       console.log('validTo', new Date(validTo));
       console.log('new Date()', new Date());
-      return new Date(validTo) > new Date();
     } catch (e) {
       console.log('certificate not valid:', cert);
       console.log('Error parsing certificate', e);
