@@ -32,21 +32,34 @@ export const getIdpCert = (idp: Element) => {
 
     console.log('certificates', certificates);
 
-    const orderedCerts = certificates.sort((a, b) => {
-      const pemCertA = `-----BEGIN CERTIFICATE-----\n${a
-        .match(/.{1,64}/g)
-        .join('\n')}\n-----END CERTIFICATE-----`;
-      const pemCertB = `-----BEGIN CERTIFICATE-----\n${b
-        .match(/.{1,64}/g)
-        .join('\n')}\n-----END CERTIFICATE-----`;
-      const { validTo: validToA } = new X509Certificate(pemCertA);
-      const { validTo: validToB } = new X509Certificate(pemCertB);
-      return new Date(validToA).getTime() - new Date(validToB).getTime();
-    });
+    const orderedCerts = certificates
+      .filter((c) => {
+        const cert = `-----BEGIN CERTIFICATE-----\n${c
+          .match(/.{1,64}/g)
+          .join('\n')}\n-----END CERTIFICATE-----`;
+        try {
+          const { validTo } = new X509Certificate(cert);
+          return new Date(validTo) > new Date();
+        } catch (e) {
+          console.log('certificate not valid:', cert);
+          console.log('Error parsing certificate', e);
+          return false;
+        }
+      })
+      .sort((a, b) => {
+        const pemCertA = `-----BEGIN CERTIFICATE-----\n${a
+          .match(/.{1,64}/g)
+          .join('\n')}\n-----END CERTIFICATE-----`;
+        const pemCertB = `-----BEGIN CERTIFICATE-----\n${b
+          .match(/.{1,64}/g)
+          .join('\n')}\n-----END CERTIFICATE-----`;
+        const { validTo: validToA } = new X509Certificate(pemCertA);
+        const { validTo: validToB } = new X509Certificate(pemCertB);
+        return new Date(validToA).getTime() - new Date(validToB).getTime();
+      });
 
     // get the newest certificate
-    cert =
-      orderedCerts.length > 0 ? orderedCerts[orderedCerts.length - 1] : null;
+    cert = orderedCerts.length > 0 ? orderedCerts[0] : null;
 
     try {
       console.log('chosen cert valididty');
