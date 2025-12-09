@@ -48,6 +48,20 @@ export const getIdpCert = (idp: Element) => {
     cert =
       orderedCerts.length > 0 ? orderedCerts[orderedCerts.length - 1] : null;
 
+    try {
+      console.log('chosen cert valididty');
+      const pemCert = `-----BEGIN CERTIFICATE-----\n${cert
+        .match(/.{1,64}/g)
+        .join('\n')}\n-----END CERTIFICATE-----`;
+      const { validTo } = new X509Certificate(pemCert);
+      console.log('validTo', new Date(validTo));
+      console.log('new Date()', new Date());
+      return new Date(validTo) > new Date();
+    } catch (e) {
+      console.log('certificate not valid:', cert);
+      console.log('Error parsing certificate', e);
+    }
+
     console.log('cert', cert);
 
     if (!cert)
