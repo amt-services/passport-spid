@@ -41,7 +41,7 @@ export const getIdpCert = (idp: Element) => {
         .join('\n')}\n-----END CERTIFICATE-----`;
       const { validTo: validToA } = new X509Certificate(certPemA);
       const { validTo: validToB } = new X509Certificate(certPemB);
-      return new Date(validToA).getTime() - new Date(validToB).getTime();
+      return new Date(validToB).getTime() - new Date(validToA).getTime();
     });
 
     cert = orderedCerts.find((certificate) => {
