@@ -32,37 +32,22 @@ export const getIdpCert = (idp: Element) => {
 
     console.log('certificates', certificates);
 
-    const validCerts = certificates.filter((certificate) => {
-      // Find a not expired X509Certificate
-      // Convert from base64 to pem format
-      const pemCert = `-----BEGIN CERTIFICATE-----\n${certificate
+    const orderedCerts = certificates.sort((a, b) => {
+      const pemCertA = `-----BEGIN CERTIFICATE-----\n${a
         .match(/.{1,64}/g)
         .join('\n')}\n-----END CERTIFICATE-----`;
-
-      console.log('pemCert', pemCert);
-      try {
-        const { validTo } = new X509Certificate(pemCert || '');
-        console.log('validTo', new Date(validTo));
-        console.log('new Date()', new Date());
-        return new Date(validTo) > new Date();
-      } catch (e) {
-        console.log('Error parsing certificate', e);
-        return false;
-      }
+      const pemCertB = `-----BEGIN CERTIFICATE-----\n${b
+        .match(/.{1,64}/g)
+        .join('\n')}\n-----END CERTIFICATE-----`;
+      const { validTo: validToA } = new X509Certificate(pemCertA);
+      const { validTo: validToB } = new X509Certificate(pemCertB);
+      return new Date(validToA).getTime() - new Date(validToB).getTime();
     });
 
-    if (validCerts.length > 1) {
-      const orderedCerts = validCerts.sort((a, b) => {
-        const { validTo: validToA } = new X509Certificate(a);
-        const { validTo: validToB } = new X509Certificate(b);
-        return new Date(validToA).getTime() - new Date(validToB).getTime();
-      });
+    // get the newest certificate
+    cert =
+      orderedCerts.length > 0 ? orderedCerts[orderedCerts.length - 1] : null;
 
-      // get the newest certificate
-      cert = orderedCerts[orderedCerts.length - 1];
-    } else {
-      cert = validCerts[0];
-    }
     console.log('cert', cert);
 
     if (!cert)
