@@ -32,7 +32,7 @@ export const getIdpCert = (idp: Element) => {
 
     console.log('certificates', certificates);
 
-    cert = certificates.find((certificate) => {
+    const validCerts = certificates.filter((certificate) => {
       // Find a not expired X509Certificate
       // Convert from base64 to pem format
       const pemCert = `-----BEGIN CERTIFICATE-----\n${certificate
@@ -50,6 +50,19 @@ export const getIdpCert = (idp: Element) => {
         return false;
       }
     });
+
+    if (validCerts.length > 1) {
+      const orderedCerts = validCerts.sort((a, b) => {
+        const { validTo: validToA } = new X509Certificate(a);
+        const { validTo: validToB } = new X509Certificate(b);
+        return new Date(validToA).getTime() - new Date(validToB).getTime();
+      });
+
+      // get the newest certificate
+      cert = orderedCerts[orderedCerts.length - 1];
+    } else {
+      cert = validCerts[0];
+    }
     console.log('cert', cert);
 
     if (!cert)
